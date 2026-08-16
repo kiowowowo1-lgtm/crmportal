@@ -4,204 +4,92 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Enterprise - Dashboard</title>
-  
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-  <style>
-    :root {
-      --sidebar-width: 250px;
-      --topbar-height: 60px;
-    }
-    body {
-      background-color: #f8fafc;
-      font-family: system-ui, -apple-system, sans-serif;
-      overflow-x: hidden;
-    }
-    
-    /* Top Navigation Bar */
-    .top-navbar {
-      height: var(--topbar-height);
-      background-color: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1030;
-      padding: 0 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Sidebar Navigation */
-    .sidebar {
-      width: var(--sidebar-width);
-      position: fixed;
-      top: var(--topbar-height);
-      bottom: 0;
-      left: 0;
-      background-color: #0f172a;
-      padding-top: 1rem;
-      z-index: 1020;
-      transition: all 0.3s ease;
-    }
-    .sidebar .nav-link {
-      color: #94a3b8;
-      padding: 0.75rem 1.25rem;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      transition: all 0.2s ease;
-    }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active {
-      color: #ffffff;
-      background-color: #1e293b;
-      border-left: 4px solid #2563eb;
-    }
-
-    /* Main Content Area */
-    .main-content {
-      margin-top: var(--topbar-height);
-      margin-left: var(--sidebar-width);
-      padding: 2rem;
-      min-height: calc(100vh - var(--topbar-height));
-    }
-
-    /* Loader Overlay */
-    .module-loader {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 300px;
-    }
-  </style>
+  <title>Enterprise CRM - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-slate-900 h-screen flex items-center justify-center px-4">
 
-  <!-- 1. Top Navigation Bar -->
-  <header class="top-navbar">
-    <div class="d-flex align-items-center gap-2">
-      <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
-        <i class="fa-solid fa-briefcase"></i>
+  <div class="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden p-8">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-3">
+        <i class="fa-solid fa-shield-halved text-2xl"></i>
       </div>
-      <span class="fw-bold text-dark fs-5">CRM Enterprise</span>
+      <h2 class="text-2xl font-bold text-gray-800">CRM Enterprise Portal</h2>
+      <p class="text-xs text-gray-500 mt-1">Mag-login gamit ang iyong System Credentials</p>
     </div>
 
-    <!-- User Profile Dropdown -->
-    <div class="dropdown">
-      <button class="btn btn-light border-0 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-        <i class="fa-solid fa-circle-user fs-5 text-secondary"></i>
-        <span id="navUsername" class="fw-semibold text-dark">User</span>
+    <!-- Alert Message Container -->
+    <div id="alertBox" class="hidden mb-4 p-3 rounded text-xs font-medium"></div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Username / Email</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <i class="fa-solid fa-user"></i>
+          </span>
+          <input type="text" id="username" required placeholder="user@company.com" 
+            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Password</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <i class="fa-solid fa-lock"></i>
+          </span>
+          <input type="password" id="password" required placeholder="••••••••" 
+            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn" 
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition flex justify-center items-center gap-2">
+        <span>Sign In</span>
+        <i class="fa-solid fa-arrow-right text-xs"></i>
       </button>
-      <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-        <li><a class="dropdown-menu-item dropdown-item text-danger" href="#" onclick="logoutUser()"><i class="fa-solid fa-right-from-bracket me-2"></i>Sign Out</a></li>
-      </ul>
-    </div>
-  </header>
-
-  <!-- 2. Sidebar Navigation -->
-  <nav class="sidebar">
-    <div class="nav flex-column">
-      <a class="nav-link active" href="#" onclick="loadModule('overview', this)">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span>Overview</span>
-      </a>
-      <a class="nav-link" href="#" onclick="loadModule('crm', this)">
-        <i class="fa-solid fa-users"></i>
-        <span>CRM Management</span>
-      </a>
-      <a class="nav-link" href="#" onclick="loadModule('ops', this)">
-        <i class="fa-solid fa-list-check"></i>
-        <span>Operations</span>
-      </a>
-      <a class="nav-link" href="#" onclick="loadModule('admin', this)">
-        <i class="fa-solid fa-user-shield"></i>
-        <span>Admin Controls</span>
-      </a>
-    </div>
-  </nav>
-
-  <!-- 3. Dynamic Main Content Area -->
-  <main class="main-content" id="moduleContainer">
-    <!-- Dynamic Module Content Will Render Here -->
-  </main>
-
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </form>
+  </div>
 
   <script>
-    let currentUser = null;
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      const alertBox = document.getElementById('alertBox');
+      const submitBtn = document.getElementById('submitBtn');
 
-    // --- SESSION GUARD & INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => {
-      const storedUser = sessionStorage.getItem('crm_user');
-      
-      if (!storedUser) {
-        // Redirection kapag walang valid session
-        redirectToLogin();
-        return;
-      }
+      alertBox.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...`;
 
-      currentUser = JSON.parse(storedUser);
-      document.getElementById('navUsername').textContent = currentUser.username || currentUser.name || 'User';
-
-      // Load default module (Overview)
-      loadModule('overview');
-    });
-
-    // --- DYNAMIC MODULE LOADER ---
-    function loadModule(moduleName, navElement = null) {
-      // Update Active Navigation Styling
-      if (navElement) {
-        document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
-        navElement.classList.add('active');
-      }
-
-      const container = document.getElementById('moduleContainer');
-      
-      // Render Loader UI habang nag-aantay ng response
-      container.innerHTML = `
-        <div class="module-loader">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="text-muted mt-2 small">Loading module...</p>
-        </div>
-      `;
-
-      // Tawagin ang backend main.gs para kunin ang module HTML component
+      // Tawagin ang backend authService.gs (o main routing)
       google.script.run
-        .withSuccessHandler(htmlContent => {
-          container.innerHTML = htmlContent;
+        .withSuccessHandler(res => {
+          if (res && res.success) {
+            alertBox.className = "mb-4 p-3 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200 block";
+            alertBox.innerText = "Success! Redirecting to Dashboard...";
+            
+            // Redirect papunta sa Dashboard gamit ang Routing Parameter
+            google.script.run.withSuccessHandler(baseUrl => {
+              window.location.href = baseUrl + "?page=dashboard";
+            }).getScriptUrl();
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>Sign In</span><i class="fa-solid fa-arrow-right text-xs"></i>`;
+            alertBox.className = "mb-4 p-3 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-200 block";
+            alertBox.innerText = res.message || "Invalid Username or Password.";
+          }
         })
         .withFailureHandler(err => {
-          container.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading"><i class="fa-solid fa-triangle-exclamation me-2"></i>Error Loading Module</h5>
-              <p class="mb-0">${err.message || 'Failed to fetch module contents.'}</p>
-            </div>
-          `;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>Sign In</span><i class="fa-solid fa-arrow-right text-xs"></i>`;
+          alertBox.className = "mb-4 p-3 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-200 block";
+          alertBox.innerText = "Server error: " + err.message;
         })
-        .includeModule(moduleName);
-    }
-
-    // --- LOGOUT & REDIRECT ---
-    function logoutUser() {
-      sessionStorage.removeItem('crm_user');
-      redirectToLogin();
-    }
-
-    function redirectToLogin() {
-      google.script.run
-        .withSuccessHandler(url => {
-          window.location.href = url;
-        })
-        .getScriptUrl();
+        .checkCredentials(user, pass); // Backend authentication function
     }
   </script>
 </body>
