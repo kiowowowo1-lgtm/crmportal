@@ -3,235 +3,417 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Enterprise System - Authentication</title>
-  
+  <title>CRM Enterprise System</title>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
   <style>
-    /* Custom loader animation */
-    .spinner {
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      border-top-color: #3b82f6;
-      width: 20px;
-      height: 20px;
-      animation: spin 0.8s linear infinite;
+    body {
+      font-family: 'Inter', sans-serif;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center font-sans antialiased selection:bg-blue-500 selection:text-white">
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
-  <!-- ========================================== -->
-  <!-- 1. LOGIN CONTAINER (Default Visible View)  -->
-  <!-- ========================================== -->
-  <div id="loginCard" class="w-full max-w-md p-6 sm:p-8 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 transition-all duration-300">
-    
-    <!-- Header Logo & Title -->
-    <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-14 h-14 bg-blue-600/10 border border-blue-500/20 rounded-2xl mb-3 text-blue-500 text-2xl">
-        <i class="fa-solid fa-car-tunnel"></i>
-      </div>
-      <h1 class="text-2xl font-black tracking-wider text-white">CRM ENTERPRISE</h1>
-      <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest font-semibold">Authorized Personnel Access</p>
-    </div>
-
-    <!-- Login Form -->
-    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5" autocomplete="off">
+  <!-- =================================================================== -->
+  <!-- 1. LOGIN SECTION (Default View)                                     -->
+  <!-- =================================================================== -->
+  <div id="loginSection" class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-gray-950 to-black">
+    <div class="w-full max-w-md glass-card rounded-2xl p-8 shadow-2xl relative overflow-hidden">
       
-      <!-- Username Input -->
-      <div>
-        <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-          Username
-        </label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500 text-sm">
-            <i class="fa-solid fa-user"></i>
-          </span>
+      <!-- Top Decorative Bar -->
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 mb-3">
+          <i class="fa-solid fa-car-tunnel text-3xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Enterprise CRM</h1>
+        <p class="text-xs text-gray-400 mt-1">Sign in to access your dashboard portal</p>
+      </div>
+
+      <!-- Alert Notification Banner -->
+      <div id="alertBox" class="hidden mb-6 p-3 rounded-lg text-xs font-medium border transition-all duration-200"></div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <i class="fa-solid fa-user text-sm"></i>
+            </span>
+            <input 
+              type="text" 
+              id="username" 
+              required 
+              placeholder="e.g. jdoe" 
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-900/80 border border-gray-700/80 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <i class="fa-solid fa-lock text-sm"></i>
+            </span>
+            <input 
+              type="password" 
+              id="password" 
+              required 
+              placeholder="••••••••" 
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-900/80 border border-gray-700/80 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+            >
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="loginBtn"
+          class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-lg shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition duration-150 flex items-center justify-center gap-2"
+        >
+          <span id="btnText">Sign In</span>
+          <i id="btnSpinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+        </button>
+      </form>
+
+      <!-- Help & Support Link -->
+      <div class="mt-6 text-center border-t border-gray-800/80 pt-4">
+        <button 
+          onclick="openITModal()" 
+          class="text-xs text-gray-400 hover:text-blue-400 transition flex items-center justify-center gap-1.5 mx-auto"
+        >
+          <i class="fa-solid fa-headset"></i> Need technical assistance? Submit IT Ticket
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =================================================================== -->
+  <!-- 2. MAIN APP SHELL CONTAINER (Hidden until authenticated)           -->
+  <!-- =================================================================== -->
+  <div id="appContainer" class="hidden min-h-screen flex flex-col bg-gray-950">
+    
+    <!-- Top Navigation Header -->
+    <header class="bg-gray-900/90 border-b border-gray-800 sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          
+          <!-- Brand / Logo -->
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-lg">
+              <i class="fa-solid fa-car-tunnel text-xl"></i>
+            </div>
+            <div>
+              <span class="font-bold text-white text-base tracking-wide">CRM Enterprise</span>
+              <span class="text-xs block text-gray-400" id="headerBranch">Branch: Main</span>
+            </div>
+          </div>
+
+          <!-- Active User Profile & Actions -->
+          <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+              <div id="headerUserName" class="text-sm font-semibold text-gray-200">User Name</div>
+              <div id="headerUserRole" class="text-xs text-blue-400 font-medium">ROLE</div>
+            </div>
+
+            <button 
+              onclick="openITModal()" 
+              title="Report Technical Issue"
+              class="p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-xs transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-bug"></i>
+              <span class="hidden md:inline">IT Help</span>
+            </button>
+
+            <button 
+              onclick="handleLogout()" 
+              class="p-2 text-red-400 hover:text-white bg-red-950/40 hover:bg-red-900/80 border border-red-900/50 rounded-lg text-xs transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span class="hidden md:inline">Logout</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic Role-Based Content Area -->
+    <main id="dynamicLayoutContent" class="flex-grow p-4 sm:p-6 max-w-7xl w-full mx-auto">
+      <div class="flex items-center justify-center h-64 text-gray-400">
+        <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-3 text-blue-500"></i> Loading module view...
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 border-t border-gray-800/60 py-3 text-center text-xs text-gray-500">
+      &copy; CRM Enterprise System. All rights reserved.
+    </footer>
+  </div>
+
+
+  <!-- =================================================================== -->
+  <!-- 3. IT SUPPORT TICKET MODAL                                          -->
+  <!-- =================================================================== -->
+  <div id="itModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 w-full max-w-lg rounded-xl shadow-2xl p-6 relative">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+        <h3 class="text-base font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-headset text-blue-400"></i> Submit IT Support Ticket
+        </h3>
+        <button onclick="closeITModal()" class="text-gray-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="modalAlert" class="hidden mt-4 p-3 rounded-lg text-xs font-medium border"></div>
+
+      <form id="itTicketForm" onsubmit="handleITSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Subject / Issue Title</label>
           <input 
             type="text" 
-            id="username" 
+            id="ticketSubject" 
             required 
-            placeholder="e.g. pm_lloyd"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            placeholder="e.g. Cannot process Job Order" 
+            class="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-200 focus:border-blue-500 focus:outline-none"
           >
         </div>
-      </div>
 
-      <!-- Password Input -->
-      <div>
-        <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-          Password
-        </label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500 text-sm">
-            <i class="fa-solid fa-lock"></i>
-          </span>
-          <input 
-            type="password" 
-            id="password" 
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Detailed Description</label>
+          <textarea 
+            id="ticketDescription" 
+            rows="4" 
             required 
-            placeholder="••••••••"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-10 pr-10 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-          >
+            placeholder="Describe what happened or steps to reproduce the error..." 
+            class="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-200 focus:border-blue-500 focus:outline-none"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
           <button 
             type="button" 
-            onclick="togglePasswordVisibility()" 
-            class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 hover:text-slate-300 text-sm focus:outline-none"
+            onclick="closeITModal()" 
+            class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-lg transition"
           >
-            <i id="togglePasswordIcon" class="fa-solid fa-eye"></i>
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            id="ticketSubmitBtn" 
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition flex items-center gap-2"
+          >
+            <span>Submit Ticket</span>
+            <i id="ticketSpinner" class="fa-solid fa-spinner fa-spin hidden"></i>
           </button>
         </div>
-      </div>
-
-      <!-- Inline Error Banner -->
-      <div id="errorMessage" class="hidden flex items-start gap-2.5 p-3.5 rounded-xl bg-red-950/50 border border-red-800/50 text-red-400 text-xs font-medium">
-        <i class="fa-solid fa-circle-exclamation text-sm mt-0.5 shrink-0"></i>
-        <span id="errorText">Invalid credentials. Please try again.</span>
-      </div>
-
-      <!-- Submit Button -->
-      <button 
-        type="submit" 
-        id="loginBtn" 
-        class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all duration-200 flex items-center justify-center space-x-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <span id="btnText">Sign In</span>
-        <div id="btnSpinner" class="spinner hidden"></div>
-      </button>
-
-    </form>
-
-    <!-- Footer Security Note -->
-    <div class="mt-8 pt-6 border-t border-slate-800/80 text-center">
-      <p class="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-shield-halved text-slate-600"></i>
-        Protected by Role-Based Access Control (RBAC)
-      </p>
+      </form>
     </div>
-
   </div>
 
-  <!-- ========================================== -->
-  <!-- 2. APPLICATION SHELL CONTAINER            -->
-  <!-- ========================================== -->
-  <div id="appShellContainer" class="hidden w-full min-h-screen">
-    <?!= includeModule('dashboard'); ?>
-  </div>
 
-  <!-- ========================================== -->
-  <!-- 3. CLIENT-SIDE SCRIPT LOGIC               -->
-  <!-- ========================================== -->
+  <!-- =================================================================== -->
+  <!-- 4. FRONTEND SCRIPT LOGIC                                           -->
+  <!-- =================================================================== -->
   <script>
-    /**
-     * Toggles Password Visibility
-     */
-    function togglePasswordVisibility() {
-      const pwdInput = document.getElementById('password');
-      const icon = document.getElementById('togglePasswordIcon');
-      
-      if (pwdInput.type === 'password') {
-        pwdInput.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      } else {
-        pwdInput.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      }
-    }
+    // Global User State
+    let currentUser = null;
 
     /**
-     * Handles Form Submission & Authentication Request
+     * Handles User Authentication
      */
     function handleLogin(e) {
       e.preventDefault();
       
       const usernameInput = document.getElementById('username').value.trim();
-      const passwordInput = document.getElementById('password').value;
-      const loginBtn = document.getElementById('loginBtn');
-      const btnText = document.getElementById('btnText');
-      const btnSpinner = document.getElementById('btnSpinner');
-      const errorBox = document.getElementById('errorMessage');
+      const passwordInput = document.getElementById('password').value.trim();
 
       if (!usernameInput || !passwordInput) {
-        displayError('Please fill in both username and password.');
+        showAlert('Please fill in both fields.', 'error');
         return;
       }
 
-      // UI Loading State
-      loginBtn.disabled = true;
-      btnText.innerText = 'Authenticating...';
-      btnSpinner.classList.remove('hidden');
-      errorBox.classList.add('hidden');
+      setLoadingState(true);
+      hideAlert();
 
-      // Server-side Call to authService.gs
+      // Call Google Apps Script Backend Function (authService.gs)
       google.script.run
         .withSuccessHandler(onLoginSuccess)
         .withFailureHandler(onLoginFailure)
         .authenticateUser(usernameInput, passwordInput);
     }
 
-    /**
-     * Handles Successful Authentication Response
-     */
     function onLoginSuccess(response) {
-      const loginBtn = document.getElementById('loginBtn');
-      const btnText = document.getElementById('btnText');
-      const btnSpinner = document.getElementById('btnSpinner');
+      setLoadingState(false);
 
       if (response && response.success) {
-        // Save current user session globally in DOM window
-        window.currentUser = response.user;
-
-        // Transition from Login UI to Application Shell
-        document.getElementById('loginCard').classList.add('hidden');
-        document.getElementById('appShellContainer').classList.remove('hidden');
-
-        // Initialize Main Shell Container (defined inside dashboard.html)
-        if (typeof initDashboardShell === 'function') {
-          initDashboardShell(response.user);
-        } else {
-          console.error('initDashboardShell() function not found in dashboard.html');
-        }
+        currentUser = response.user;
+        showAppShell();
+        loadRoleLayout(currentUser.role);
       } else {
-        // Reset UI & Show Error
-        btnSpinner.classList.add('hidden');
-        btnText.innerText = 'Sign In';
-        loginBtn.disabled = false;
-        displayError(response ? response.message : 'Invalid credentials. Access denied.');
+        showAlert(response.message || 'Invalid credentials.', 'error');
       }
     }
 
-    /**
-     * Handles GAS Server Errors
-     */
     function onLoginFailure(error) {
-      const loginBtn = document.getElementById('loginBtn');
-      const btnText = document.getElementById('btnText');
-      const btnSpinner = document.getElementById('btnSpinner');
-
-      btnSpinner.classList.add('hidden');
-      btnText.innerText = 'Sign In';
-      loginBtn.disabled = false;
-
-      displayError('System Error: ' + (error.message || 'Unable to connect to server.'));
+      setLoadingState(false);
+      showAlert('Server Error: ' + error.message, 'error');
     }
 
     /**
-     * Helper to render error message
+     * Show/Hide App Containers
      */
-    function displayError(msg) {
-      const errorBox = document.getElementById('errorMessage');
-      const errorText = document.getElementById('errorText');
-      errorText.innerText = msg;
-      errorBox.classList.remove('hidden');
+    function showAppShell() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('appContainer').classList.remove('hidden');
+
+      // Update Header Info
+      document.getElementById('headerUserName').textContent = currentUser.fullName || currentUser.username;
+      document.getElementById('headerUserRole').textContent = currentUser.role;
+      document.getElementById('headerBranch').textContent = 'Branch: ' + (currentUser.branch || 'Main');
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('loginForm').reset();
+      document.getElementById('appContainer').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+      hideAlert();
+    }
+
+    /**
+     * Loads Dynamic Layout File based on Role
+     */
+    function loadRoleLayout(role) {
+      const container = document.getElementById('dynamicLayoutContent');
+      container.innerHTML = `
+        <div class="flex items-center justify-center h-64 text-gray-400">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-3 text-blue-500"></i> Loading workspace...
+        </div>`;
+
+      // Call Google Apps Script Backend Router (main.gs)
+      google.script.run
+        .withSuccessHandler(function(layoutName) {
+          // Fetch module file content
+          google.script.run
+            .withSuccessHandler(function(htmlContent) {
+              container.innerHTML = htmlContent;
+            })
+            .withFailureHandler(function(err) {
+              container.innerHTML = `<div class="p-4 bg-red-900/30 text-red-400 border border-red-800 rounded-lg text-sm">Failed to load view layout: ${err.message}</div>`;
+            })
+            .includeModule(layoutName);
+        })
+        .withFailureHandler(function(err) {
+          container.innerHTML = `<div class="p-4 bg-red-900/30 text-red-400 border border-red-800 rounded-lg text-sm">${err.message}</div>`;
+        })
+        .getLayoutByRole(role);
+    }
+
+    /**
+     * UI Helper Alerts & Spinners
+     */
+    function setLoadingState(isLoading) {
+      const btn = document.getElementById('loginBtn');
+      const text = document.getElementById('btnText');
+      const spinner = document.getElementById('btnSpinner');
+
+      btn.disabled = isLoading;
+      if (isLoading) {
+        text.textContent = 'Authenticating...';
+        spinner.classList.remove('hidden');
+      } else {
+        text.textContent = 'Sign In';
+        spinner.classList.add('hidden');
+      }
+    }
+
+    function showAlert(msg, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = msg;
+      alertBox.classList.remove('hidden', 'bg-red-900/40', 'border-red-800', 'text-red-300', 'bg-green-900/40', 'border-green-800', 'text-green-300');
+
+      if (type === 'error') {
+        alertBox.classList.add('bg-red-900/40', 'border-red-800', 'text-red-300');
+      } else {
+        alertBox.classList.add('bg-green-900/40', 'border-green-800', 'text-green-300');
+      }
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').classList.add('hidden');
+    }
+
+    /**
+     * IT Support Modal Handlers
+     */
+    function openITModal() {
+      document.getElementById('itModal').classList.remove('hidden');
+    }
+
+    function closeITModal() {
+      document.getElementById('itModal').classList.add('hidden');
+      document.getElementById('itTicketForm').reset();
+      document.getElementById('modalAlert').classList.add('hidden');
+    }
+
+    function handleITSubmit(e) {
+      e.preventDefault();
+      
+      const ticketData = {
+        subject: document.getElementById('ticketSubject').value.trim(),
+        description: document.getElementById('ticketDescription').value.trim(),
+        reportedBy: currentUser ? currentUser.username : 'Anonymous User',
+        role: currentUser ? currentUser.role : 'GUEST',
+        branch: currentUser ? currentUser.branch : 'Main'
+      };
+
+      const btnSpinner = document.getElementById('ticketSpinner');
+      const submitBtn = document.getElementById('ticketSubmitBtn');
+      
+      submitBtn.disabled = true;
+      btnSpinner.classList.remove('hidden');
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          submitBtn.disabled = false;
+          btnSpinner.classList.add('hidden');
+          const mAlert = document.getElementById('modalAlert');
+          mAlert.classList.remove('hidden', 'bg-red-900/40', 'text-red-300', 'bg-green-900/40', 'text-green-300');
+
+          if (res && res.success) {
+            mAlert.classList.add('bg-green-900/40', 'border-green-800', 'text-green-300');
+            mAlert.textContent = res.message;
+            setTimeout(() => { closeITModal(); }, 2000);
+          } else {
+            mAlert.classList.add('bg-red-900/40', 'border-red-800', 'text-red-300');
+            mAlert.textContent = res.message || 'Failed to submit ticket.';
+          }
+        })
+        .withFailureHandler(function(err) {
+          submitBtn.disabled = false;
+          btnSpinner.classList.add('hidden');
+          const mAlert = document.getElementById('modalAlert');
+          mAlert.classList.remove('hidden', 'bg-red-900/40', 'border-red-800', 'text-red-300');
+          mAlert.textContent = 'Error: ' + err.message;
+        })
+        .submitITTicket(ticketData);
     }
   </script>
 </body>
