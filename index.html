@@ -1,113 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enterprise CRM Shell</title>
+  <title>Shop Management System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 font-sans antialiased h-screen flex flex-col">
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
 
-  <!-- Top Navigation Header -->
-  <header class="bg-slate-900 text-white shadow-md flex justify-between items-center px-6 py-3 shrink-0">
-    <div class="flex items-center gap-3">
-      <i class="fa-solid fa-layer-group text-xl text-blue-400"></i>
-      <h1 class="font-bold text-lg tracking-wide">Enterprise CRM</h1>
-    </div>
-    
-    <!-- Role-Based Top Level Modules Navigation -->
-    <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
-      <button onclick="switchLayout('pmLayout')" id="nav-pmLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
-        <i class="fa-solid fa-bullhorn mr-1"></i> Page Manager
-      </button>
-      <button onclick="switchLayout('opsLayout')" id="nav-opsLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
-        <i class="fa-solid fa-gears mr-1"></i> Operations
-      </button>
-      <button onclick="switchLayout('direkLayout')" id="nav-direkLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
-        <i class="fa-solid fa-chart-line mr-1"></i> Executive
-      </button>
-      <button onclick="switchLayout('hrLayout')" id="nav-hrLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
-        <i class="fa-solid fa-users mr-1"></i> HR
-      </button>
-      <button onclick="switchLayout('itLayout')" id="nav-itLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
-        <i class="fa-solid fa-code-branch mr-1"></i> IT Manager
-      </button>
-    </nav>
-
-    <!-- User Profile & Logout -->
-    <div class="flex items-center gap-4">
-      <div class="text-right text-xs hidden sm:block">
-        <div id="userDisplayName" class="font-semibold text-gray-200">User Account</div>
-        <div id="userRoleBadge" class="text-blue-400 font-mono text-[10px] uppercase">Loading...</div>
+  <!-- ========================================== -->
+  <!-- 1. LOGIN SCREEN CONTAINER                  -->
+  <!-- ========================================== -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-900">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-8 space-y-6">
+      
+      <!-- Brand Header -->
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl mx-auto shadow-md">
+          <i class="fa-solid fa-wrench"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">Shop System Login</h2>
+        <p class="text-xs text-gray-500">Ilagay ang iyong Username at Password para makapasok.</p>
       </div>
-      <button onclick="logout()" class="text-gray-400 hover:text-red-400 text-sm transition" title="Logout">
-        <i class="fa-solid fa-right-from-bracket text-lg"></i>
-      </button>
-    </div>
-  </header>
 
-  <!-- Dynamic Layout Injection Container -->
-  <main id="mainContent" class="flex-1 overflow-hidden relative p-4">
-    <div class="flex items-center justify-center h-full text-gray-400">
-      <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i> Loading Module...
-    </div>
-  </main>
+      <!-- Error Alert Message -->
+      <div id="loginError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="loginErrorMsg">Maling Username o Password!</span>
+      </div>
 
+      <!-- Login Form -->
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Username</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" id="loginUsername" required placeholder="Hal. admin o pm_user" 
+              class="w-full text-xs border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="password" id="loginPassword" required placeholder="••••••••" 
+              class="w-full text-xs border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <button type="submit" id="btnLoginSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-3 rounded-lg shadow-md transition flex items-center justify-center gap-2">
+          <span>Sign In</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. MAIN APPLICATION SHELL                  -->
+  <!-- ========================================== -->
+  <div id="appContainer" class="hidden min-h-screen flex flex-col">
+    
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-blue-600 text-white rounded-lg">
+          <i class="fa-solid fa-gauge-high text-sm"></i>
+        </div>
+        <h1 class="font-bold text-gray-800 text-sm sm:text-base">Auto Shop Portal</h1>
+      </div>
+
+      <!-- User Profile Badge & Logout -->
+      <div class="flex items-center gap-4">
+        <div class="text-right hidden sm:block">
+          <div id="currentUserName" class="text-xs font-bold text-gray-800">User Name</div>
+          <div id="currentUserRole" class="text-[10px] font-semibold text-blue-600 uppercase">Role</div>
+        </div>
+
+        <button onclick="handleLogout()" class="text-xs text-red-600 hover:bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Module Container -->
+    <main id="mainContent" class="flex-1 p-6 overflow-y-auto">
+      <!-- Dito i-inject ang Layout depende sa Role -->
+    </main>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- AUTHENTICATION & ROLE-SWITCHING LOGIC      -->
+  <!-- ========================================== -->
   <script>
-    let activeLayout = '';
+    // Local Session State
+    let activeUser = null;
 
-    // Function para palitan ang module shell (hal. pmLayout, opsLayout)
-    function switchLayout(layoutName) {
-      if (activeLayout === layoutName) return;
-      activeLayout = layoutName;
+    /**
+     * Isinesumite ang credentials sa backend para i-verify.
+     */
+    function handleLogin(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLoginSubmit');
+      const errBox = document.getElementById('loginError');
 
-      // Update Active Navigation Button Styling
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white');
-        btn.classList.add('text-gray-300');
-      });
-      const activeBtn = document.getElementById('nav-' + layoutName);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-blue-600', 'text-white');
-        activeBtn.classList.remove('text-gray-300');
+      errBox.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Checking...`;
+
+      // Pagtawag sa Apps Script Backend Function (authenticateUser)
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(response => {
+            btn.disabled = false;
+            btn.innerHTML = `<span>Sign In</span> <i class="fa-solid fa-arrow-right"></i>`;
+
+            if (response.success) {
+              activeUser = response.user;
+              initUserSession();
+            } else {
+              showLoginError(response.message || 'Maling Username o Password!');
+            }
+          })
+          .withFailureHandler(err => {
+            btn.disabled = false;
+            btn.innerHTML = `<span>Sign In</span> <i class="fa-solid fa-arrow-right"></i>`;
+            showLoginError('Network Error: ' + err.message);
+          })
+          .authenticateUser(username, password);
+      } else {
+        // Fallback / Demo Simulation kung ginagamit nang hiwalay sa Google Apps Script
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = `<span>Sign In</span> <i class="fa-solid fa-arrow-right"></i>`;
+
+          if (username === 'pm' && password === '1234') {
+            activeUser = { name: 'Lloyd - Page Manager', username: 'pm', role: 'PAGE_MANAGER' };
+            initUserSession();
+          } else if (username === 'admin' && password === '1234') {
+            activeUser = { name: 'Admin Account', username: 'admin', role: 'ADMIN' };
+            initUserSession();
+          } else {
+            showLoginError('Maling Username o Password! (Demo: user "pm" o "admin", pass "1234")');
+          }
+        }, 600);
       }
+    }
 
-      // Show Loading State
-      document.getElementById('mainContent').innerHTML = `
-        <div class="flex items-center justify-center h-full text-gray-400">
-          <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i> Loading ${layoutName}...
+    /**
+     * Iinililipat ang screen mula Login papuntang Main View depende sa Role
+     */
+    function initUserSession() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appContainer').classList.remove('hidden');
+
+      document.getElementById('currentUserName').innerText = activeUser.name;
+      document.getElementById('currentUserRole').innerText = activeUser.role;
+
+      // Switch Module Views Batay sa Role
+      switch (activeUser.role) {
+        case 'PAGE_MANAGER':
+        case 'ADMIN':
+          loadModule('pmLayout');
+          break;
+        case 'TECHNICIAN':
+          loadModule('techLayout'); // Placeholder halimbawa para sa ibang role
+          break;
+        default:
+          loadModule('pmLayout');
+      }
+    }
+
+    /**
+     * Nag-i-inject ng module HTML mula sa server
+     */
+    function loadModule(moduleName) {
+      const container = document.getElementById('mainContent');
+      container.innerHTML = `
+        <div class="flex items-center justify-center h-64 text-gray-400">
+          <i class="fa-solid fa-circle-notch fa-spin text-3xl mr-3 text-blue-500"></i>
+          <span class="text-sm font-medium">Loading Module...</span>
         </div>
       `;
 
-      // Fetch Layout via Apps Script Server Call
-      google.script.run
-        .withSuccessHandler(html => {
-          document.getElementById('mainContent').innerHTML = html;
-        })
-        .withFailureHandler(err => {
-          document.getElementById('mainContent').innerHTML = `
-            <div class="p-6 bg-red-50 text-red-700 rounded-lg border border-red-200 m-4">
-              <h3 class="font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error Loading Module</h3>
-              <p class="text-sm mt-1">${err.message}</p>
-            </div>
-          `;
-        })
-        .includeModule(layoutName);
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(html => {
+            container.innerHTML = html;
+          })
+          .withFailureHandler(err => {
+            container.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded-lg">Error loading ${moduleName}: ${err.message}</div>`;
+          })
+          .includeModule(moduleName);
+      } else {
+        container.innerHTML = `<div class="p-6 bg-white rounded-xl border border-gray-200 text-center font-semibold text-gray-700">Loaded Module: <b>${moduleName}.html</b> (Demo Mode)</div>`;
+      }
     }
 
-    // Default Initialization on Page Load
-    window.addEventListener('DOMContentLoaded', () => {
-      // Load Page Manager (pmLayout) as Default Initial View
-      switchLayout('pmLayout');
-    });
+    function showLoginError(msg) {
+      const errBox = document.getElementById('loginError');
+      document.getElementById('loginErrorMsg').innerText = msg;
+      errBox.classList.remove('hidden');
+    }
 
-    function logout() {
-      google.script.run.withSuccessHandler(url => {
-        window.location.href = url;
-      }).getScriptUrl();
+    function handleLogout() {
+      activeUser = null;
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginError').classList.add('hidden');
+
+      document.getElementById('appContainer').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('mainContent').innerHTML = '';
     }
   </script>
+
 </body>
 </html>
