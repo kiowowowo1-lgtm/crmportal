@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autoshop CRM - Operations Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased h-screen flex overflow-hidden">
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyCHSpEc6KeZfCfD0YAuLsyMkLsa-LI5SGbINSTTgZAx_QyyzO9IBwjFa6J_evGHho/exec";
+    
+    // Auth Check: Redirect to index.html if no session exists
+    const storedUser = localStorage.getItem("autoshop_user");
+    if (!storedUser) {
+      window.location.href = "index.html";
+    }
+    const currentUser = JSON.parse(storedUser);
+  </script>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 shadow-xl flex-shrink-0">
+    
+    <div>
+      <!-- Brand Header -->
+      <div class="p-4 border-b border-slate-800 flex items-center space-x-3">
+        <div class="bg-red-600 text-white p-2 rounded-lg font-black text-sm">AS</div>
+        <div>
+          <h1 class="font-black text-white text-base tracking-wide leading-none">AUTOSHOP</h1>
+          <span class="text-[10px] text-slate-400 font-medium">Operations Center</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Role-Based Navigation Links -->
+      <nav class="p-3 space-y-1 text-xs" id="sidebarNav">
+        <!-- PM Layout Link -->
+        <a href="#" onclick="switchLayout('pmLayout')" id="nav-pmLayout" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-slate-800 text-white font-medium hover:bg-slate-800 transition">
+          <i class="fa-solid fa-headset w-4 text-center text-red-500"></i>
+          <span>PM Lead Desk</span>
+        </a>
+        <!-- SA Layout Link -->
+        <a href="#" onclick="switchLayout('saLayout')" id="nav-saLayout" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-file-invoice-dollar w-4 text-center text-blue-400"></i>
+          <span>SA Workflow & Quotes</span>
+        </a>
+        <!-- BM Layout Link -->
+        <a href="#" onclick="switchLayout('bmLayout')" id="nav-bmLayout" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-user-check w-4 text-center text-emerald-400"></i>
+          <span>BM Approvals & Gatepass</span>
+        </a>
+        <!-- Executive / Direk Layout Link -->
+        <a href="#" onclick="switchLayout('direkLayout')" id="nav-direkLayout" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-chart-line w-4 text-center text-amber-400"></i>
+          <span>Executive Dashboard</span>
+        </a>
+        <!-- HR Layout Link -->
+        <a href="#" onclick="switchLayout('hrLayout')" id="nav-hrLayout" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-id-card w-4 text-center text-purple-400"></i>
+          <span>HR & Attendance</span>
+        </a>
+        <!-- IT Control Center Link -->
+        <a href="#" onclick="switchLayout('itLayout')" id="nav-itLayout" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-bug w-4 text-center text-rose-400"></i>
+          <span>IT Control & Bug Tracker</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-slate-800 bg-slate-950/50">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 overflow-hidden">
+          <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-200 border border-slate-700" id="userAvatar">
+            U
+          </div>
+          <div class="truncate">
+            <p class="text-xs font-bold text-white truncate" id="userName">User Name</p>
+            <div class="flex items-center space-x-1">
+              <span id="userRoleBadge" class="text-[9px] bg-red-950 text-red-400 border border-red-800/60 font-bold px-1.5 py-0.2 rounded">ROLE</span>
+              <span id="userBranchBadge" class="text-[9px] text-slate-400 truncate">Branch</span>
+            </div>
+          </div>
+        </div>
+        <button onclick="logout()" title="Logout" class="text-slate-400 hover:text-red-400 p-1.5 transition">
+          <i class="fa-solid fa-right-from-bracket text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+    
+    <!-- TOPBAR HEADER -->
+    <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-gray-800 leading-tight" id="activeTabTitle">PM Inquiries & Lead Management</h2>
+        <p class="text-xs text-gray-500" id="activeTabSubtitle">Manage customer contacts, appointments, and status conversions</p>
+      </div>
+      <div class="flex items-center space-x-3" id="topbarActions">
+        <button onclick="openNewLeadModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg text-xs shadow-sm transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-plus text-[10px]"></i>
+          <span>New Inquiry</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW PANELS CONTAINER -->
+    <div class="flex-1 overflow-y-auto p-6">
+
+      <!-- 1. pmLayout: Page Managers / Marketing Dashboard -->
+      <div id="view-pmLayout" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
+            <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-list-check text-lg"></i></div>
+            <div>
+              <p class="text-[10px] font-bold uppercase text-gray-400">Total Leads</p>
+              <h3 class="text-xl font-black text-gray-800" id="statTotalLeads">0</h3>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
+            <div class="p-3 bg-amber-50 text-amber-600 rounded-lg"><i class="fa-solid fa-calendar-check text-lg"></i></div>
+            <div>
+              <p class="text-[10px] font-bold uppercase text-gray-400">Booked</p>
+              <h3 class="text-xl font-black text-amber-600" id="statBooked">0</h3>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-circle-check text-lg"></i></div>
+            <div>
+              <p class="text-[10px] font-bold uppercase text-gray-400">Showed Up</p>
+              <h3 class="text-xl font-black text-emerald-600" id="statShowedUp">0</h3>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center space-x-3">
+            <div class="p-3 bg-red-50 text-red-600 rounded-lg"><i class="fa-solid fa-ban text-lg"></i></div>
+            <div>
+              <p class="text-[10px] font-bold uppercase text-gray-400">Cancelled</p>
+              <h3 class="text-xl font-black text-red-600" id="statCancelled">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-3 justify-between items-center bg-gray-50/50">
+            <div class="flex items-center space-x-2 w-full md:w-auto flex-1">
+              <div class="relative flex-1 max-w-xs">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                <input type="text" id="leadSearchInput" onkeyup="filterLeadsTable()" placeholder="Search name, phone, plate..." class="w-full border rounded-lg pl-8 pr-3 py-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-slate-900">
+              </div>
+              <select id="statusFilter" onchange="filterLeadsTable()" class="border text-xs rounded-lg px-3 py-1.5 bg-white outline-none font-medium text-gray-600">
+                <option value="ALL">All Statuses</option>
+                <option value="Booked">Booked</option>
+                <option value="Showed Up">Showed Up</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button onclick="loadLeads()" class="text-xs text-slate-600 hover:text-slate-900 font-semibold flex items-center space-x-1">
+              <i class="fa-solid fa-rotate text-[10px]"></i>
+              <span>Refresh Data</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-gray-100/70 text-gray-600 font-bold uppercase border-b border-gray-200">
+                <tr>
+                  <th class="p-3">Lead ID</th>
+                  <th class="p-3">Client Name</th>
+                  <th class="p-3">Contact</th>
+                  <th class="p-3">Car / Plate</th>
+                  <th class="p-3">Service</th>
+                  <th class="p-3">Branch</th>
+                  <th class="p-3">Appt Date</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3">Edited By</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody" class="divide-y divide-gray-200">
+                <tr><td colspan="9" class="p-6 text-center text-gray-400 font-medium">Fetching active records...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. saLayout: Service Advisors Workflow (Steps 1-5, JOs, Quotes) -->
+      <div id="view-saLayout" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 text-sm mb-2"><i class="fa-solid fa-list-ol text-blue-600 mr-2"></i>Service Advisor Opportunities Pipeline (Step 1–5)</h3>
+          <p class="text-xs text-gray-500 mb-4">Track Job Orders, Quotations, Downpayments, and Gatepass clearances.</p>
+          <div class="border rounded-lg p-8 text-center text-gray-400">
+            <i class="fa-solid fa-file-signature text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">Service Advisor Opportunity Pipeline Module Ready for Data Integration.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. bmLayout: Branch Managers (Approvals, Gatepass, 10 AM Attendance) -->
+      <div id="view-bmLayout" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 text-sm mb-2"><i class="fa-solid fa-user-check text-emerald-600 mr-2"></i>Branch Management & Gatepass Approvals</h3>
+          <p class="text-xs text-gray-500 mb-4">Review PO Approvals, 10 AM Roster Attendance, and Release Gatepasses.</p>
+          <div class="border rounded-lg p-8 text-center text-gray-400">
+            <i class="fa-solid fa-shield-halved text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">BM Approval Console Ready.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. direkLayout: Executive Dashboard (Revenue & Conversion) -->
+      <div id="view-direkLayout" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 text-sm mb-2"><i class="fa-solid fa-chart-pie text-amber-500 mr-2"></i>Executive Revenue & Performance Metrics</h3>
+          <div class="border rounded-lg p-8 text-center text-gray-400">
+            <i class="fa-solid fa-sack-dollar text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">Executive Analytics Module Ready.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. hrLayout: HR Directory & Multi-Branch Attendance -->
+      <div id="view-hrLayout" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 text-sm mb-2"><i class="fa-solid fa-users text-purple-600 mr-2"></i>HR Directory & 10 AM Multi-Branch Roster</h3>
+          <div class="border rounded-lg p-8 text-center text-gray-400">
+            <i class="fa-solid fa-clipboard-user text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">HR Employee & Attendance Database Connected.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. itLayout: IT Bug Tracker & System Health (Jerome, Phoebe, Lloyd) -->
+      <div id="view-itLayout" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-gray-800 text-sm"><i class="fa-solid fa-bug text-rose-600 mr-2"></i>IT Control & Bug Ticket Tracker</h3>
+              <p class="text-xs text-gray-500">Assigned Personnel: Jerome (johnjerome), Phoebe (phoebe), Lloyd (lloyd)</p>
+            </div>
+            <span class="bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded text-xs">IT Master Control</span>
+          </div>
+          <div class="border rounded-lg p-8 text-center text-gray-400">
+            <i class="fa-solid fa-terminal text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">IT Audit Logs & System Health Monitor Active.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL: NEW LEAD RECORD -->
+  <div id="newLeadModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 border border-gray-100">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-gray-800 text-sm flex items-center space-x-2">
+          <i class="fa-solid fa-user-plus text-emerald-600"></i>
+          <span>Add New Lead Inquiry</span>
+        </h3>
+        <button onclick="closeModal('newLeadModal')" class="text-gray-400 hover:text-gray-600 font-bold">&times;</button>
+      </div>
+
+      <form id="createLeadForm" onsubmit="handleCreateLead(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Client Name</label>
+          <input type="text" id="leadClientName" placeholder="e.g. Juan Dela Cruz" required class="w-full border rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Contact No.</label>
+            <input type="text" id="leadContact" placeholder="09171234567" required class="w-full border rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Car / Plate</label>
+            <input type="text" id="leadCar" placeholder="Vios - ABC 1234" required class="w-full border rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Requested Service</label>
+          <select id="leadService" class="w-full border rounded-lg px-3 py-1.5 text-xs bg-white outline-none">
+            <option value="Over-All Check up">Over-All Check up</option>
+            <option value="Aircon Check up">Aircon Check up</option>
+            <option value="Computer Scan Diagnosis">Computer Scan Diagnosis</option>
+            <option value="EGR Cleaning">EGR Cleaning</option>
+            <option value="ATF">ATF</option>
+            <option value="Electrical Component">Electrical Component</option>
+            <option value="Change Oil">Change Oil</option>
+            <option value="PMS">PMS</option>
+            <option value="PMS Check up">PMS Check up</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Branch</label>
+            <select id="leadBranch" class="w-full border rounded-lg px-3 py-1.5 text-xs bg-white outline-none">
+              <option value="Mandaluyong">Mandaluyong</option>
+              <option value="QC">QC</option>
+              <option value="Las Piñas">Las Piñas</option>
+              <option value="Mastermind">Mastermind HQ</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Appt Date</label>
+            <input type="date" id="leadApptDate" required class="w-full border rounded-lg px-3 py-1.5 text-xs bg-white outline-none">
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs transition shadow-md">
+          Save Lead & Send SMSGate Notice
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let allLeadsData = [];
+
+    // Initialize User Data & View
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("userName").innerText = currentUser.full_name || currentUser.username;
+      document.getElementById("userAvatar").innerText = (currentUser.full_name || currentUser.username).charAt(0).toUpperCase();
+      document.getElementById("userRoleBadge").innerText = currentUser.role || "USER";
+      document.getElementById("userBranchBadge").innerText = currentUser.branch_assigned || currentUser.branch || "All";
+
+      // Default Layout View
+      switchLayout('pmLayout');
+    });
+
+    // Layout Switcher Function
+    function switchLayout(layoutName) {
+      document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
+      const activeView = document.getElementById(`view-${layoutName}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      // Update Topbar Title
+      const titles = {
+        'pmLayout': { title: 'PM Inquiries & Lead Management', sub: 'Manage customer contacts, appointments, and status conversions' },
+        'saLayout': { title: 'Service Advisor Workflow (Step 1–5)', sub: 'Job Orders, Quotations, and Parts Inspections' },
+        'bmLayout': { title: 'Branch Manager Desk', sub: 'PO Approvals, Gatepass Clearances, and 10 AM Attendance' },
+        'direkLayout': { title: 'Executive Overview', sub: 'Revenue Metrics, Lead Conversion Rates, and Branch Comparison' },
+        'hrLayout': { title: 'HR Portal', sub: 'Employee Directory, Multi-Branch Attendance, and Leave Records' },
+        'itLayout': { title: 'IT System Health & Bug Tracker', sub: 'System Control Panel assigned to Jerome, Phoebe, and Lloyd' }
+      };
+
+      if (titles[layoutName]) {
+        document.getElementById("activeTabTitle").innerText = titles[layoutName].title;
+        document.getElementById("activeTabSubtitle").innerText = titles[layoutName].sub;
+      }
+
+      if (layoutName === 'pmLayout') {
+        loadLeads();
+      }
+    }
+
+    // Load Leads for PM Layout
+    async function loadLeads() {
+      const tbody = document.getElementById("leadsTableBody");
+      tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-gray-400 font-medium">Fetching active records...</td></tr>`;
+
+      try {
+        const response = await fetch(`${API_URL}?action=getLeads`);
+        const result = await response.json();
+
+        if (result.status === "success" && result.data.length > 0) {
+          allLeadsData = result.data;
+          renderLeadsTable(allLeadsData);
+          updateMetrics(allLeadsData);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-gray-400">No lead records found. Click '+ New Inquiry' to create one.</td></tr>`;
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-red-500">Failed to load data from server.</td></tr>`;
+      }
+    }
+
+    function renderLeadsTable(data) {
+      const tbody = document.getElementById("leadsTableBody");
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-gray-400">No matching records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(lead => `
+        <tr class="hover:bg-gray-50/80 transition">
+          <td class="p-3 font-mono text-[11px] font-bold text-gray-500">${lead.lead_id}</td>
+          <td class="p-3 font-bold text-gray-800">${lead.client_name}</td>
+          <td class="p-3 font-mono">${lead.contact_number}</td>
+          <td class="p-3 font-semibold">${lead.car_plate_model}</td>
+          <td class="p-3">${lead.requested_service}</td>
+          <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold border">${lead.branch}</span></td>
+          <td class="p-3">${lead.appointment_date ? new Date(lead.appointment_date).toLocaleDateString() : 'N/A'}</td>
+          <td class="p-3">
+            <select onchange="inlineUpdateStatus('${lead.lead_id}', this.value)" class="border text-[11px] rounded-md px-2 py-0.5 bg-white font-bold outline-none shadow-sm">
+              <option value="Booked" ${lead.status === 'Booked' ? 'selected' : ''}>Booked</option>
+              <option value="Showed Up" ${lead.status === 'Showed Up' ? 'selected' : ''}>Showed Up</option>
+              <option value="Cancelled" ${lead.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td class="p-3 text-gray-400 text-[10px]">${lead.last_edited_by || 'N/A'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function updateMetrics(data) {
+      document.getElementById("statTotalLeads").innerText = data.length;
+      document.getElementById("statBooked").innerText = data.filter(d => d.status === 'Booked').length;
+      document.getElementById("statShowedUp").innerText = data.filter(d => d.status === 'Showed Up').length;
+      document.getElementById("statCancelled").innerText = data.filter(d => d.status === 'Cancelled').length;
+    }
+
+    function filterLeadsTable() {
+      const searchTerm = document.getElementById("leadSearchInput").value.toLowerCase();
+      const statusFilter = document.getElementById("statusFilter").value;
+
+      const filtered = allLeadsData.filter(lead => {
+        const matchesSearch = lead.client_name.toLowerCase().includes(searchTerm) ||
+                              lead.contact_number.toLowerCase().includes(searchTerm) ||
+                              lead.car_plate_model.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusFilter === "ALL" || lead.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      });
+
+      renderLeadsTable(filtered);
+    }
+
+    async function handleCreateLead(e) {
+      e.preventDefault();
+      const payload = {
+        action: "createLead",
+        client_name: document.getElementById("leadClientName").value,
+        contact_number: document.getElementById("leadContact").value,
+        car_plate_model: document.getElementById("leadCar").value,
+        requested_service: document.getElementById("leadService").value,
+        branch: document.getElementById("leadBranch").value,
+        appointment_date: document.getElementById("leadApptDate").value,
+        booked_by: currentUser.username,
+        page_manager: currentUser.username
+      };
+
+      Swal.fire({ title: 'Saving Record & Sending SMSGate Notice...', didOpen: () => Swal.showLoading() });
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+          Swal.fire({ icon: 'success', title: 'Lead Recorded!', text: 'SMS confirmation dispatched via SMSGate.', timer: 1500, showConfirmButton: false });
+          closeModal('newLeadModal');
+          document.getElementById("createLeadForm").reset();
+          loadLeads();
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: result.message });
+        }
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Connection Error', text: err.toString() });
+      }
+    }
+
+    async function inlineUpdateStatus(leadId, newStatus) {
+      const payload = {
+        action: "updateLeadStatus",
+        lead_id: leadId,
+        status: newStatus,
+        updated_by: currentUser.username
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+          Toast.fire({ icon: 'success', title: `Status set to ${newStatus}` });
+          loadLeads();
+        }
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Update Failed', text: err.toString() });
+      }
+    }
+
+    function openNewLeadModal() { document.getElementById("newLeadModal").classList.remove("hidden"); }
+    function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+    function logout() {
+      localStorage.removeItem("autoshop_user");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
