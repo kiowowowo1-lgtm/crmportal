@@ -4,119 +4,109 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Enterprise Portal</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: #0f172a;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 0;
-    }
-    .card-login {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    }
-  </style>
+  <title>Enterprise CRM Shell</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-100 font-sans antialiased h-screen flex flex-col">
 
-  <div class="card-login">
-    <div class="text-center mb-4">
-      <div class="bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
-        <i class="fa-solid fa-briefcase fs-4"></i>
-      </div>
-      <h4 class="fw-bold m-0">CRM Enterprise</h4>
-      <small class="text-muted">Mag-login para magpatuloy</small>
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900 text-white shadow-md flex justify-between items-center px-6 py-3 shrink-0">
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-layer-group text-xl text-blue-400"></i>
+      <h1 class="font-bold text-lg tracking-wide">Enterprise CRM</h1>
     </div>
-
-    <div id="alertMsg" class="alert alert-danger py-2 small d-none" role="alert"></div>
-
-    <form id="loginForm" onsubmit="submitLogin(event)">
-      <div class="mb-3">
-        <label class="form-label small fw-bold text-secondary">USERNAME</label>
-        <input type="text" id="username" class="form-control" placeholder="Ipasok ang username" required>
-      </div>
-
-      <div class="mb-4">
-        <label class="form-label small fw-bold text-secondary">PASSWORD</label>
-        <input type="password" id="password" class="form-control" placeholder="Ipasok ang password" required>
-      </div>
-
-      <button type="submit" id="btnSubmit" class="btn btn-primary w-100 py-2 fw-bold">
-        <span id="btnText">Sign In</span>
-        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+    
+    <!-- Role-Based Top Level Modules Navigation -->
+    <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+      <button onclick="switchLayout('pmLayout')" id="nav-pmLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
+        <i class="fa-solid fa-bullhorn mr-1"></i> Page Manager
       </button>
-    </form>
-  </div>
+      <button onclick="switchLayout('opsLayout')" id="nav-opsLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
+        <i class="fa-solid fa-gears mr-1"></i> Operations
+      </button>
+      <button onclick="switchLayout('direkLayout')" id="nav-direkLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
+        <i class="fa-solid fa-chart-line mr-1"></i> Executive
+      </button>
+      <button onclick="switchLayout('hrLayout')" id="nav-hrLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
+        <i class="fa-solid fa-users mr-1"></i> HR
+      </button>
+      <button onclick="switchLayout('itLayout')" id="nav-itLayout" class="nav-btn px-3 py-2 rounded-md transition hover:bg-slate-800">
+        <i class="fa-solid fa-code-branch mr-1"></i> IT Manager
+      </button>
+    </nav>
+
+    <!-- User Profile & Logout -->
+    <div class="flex items-center gap-4">
+      <div class="text-right text-xs hidden sm:block">
+        <div id="userDisplayName" class="font-semibold text-gray-200">User Account</div>
+        <div id="userRoleBadge" class="text-blue-400 font-mono text-[10px] uppercase">Loading...</div>
+      </div>
+      <button onclick="logout()" class="text-gray-400 hover:text-red-400 text-sm transition" title="Logout">
+        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Dynamic Layout Injection Container -->
+  <main id="mainContent" class="flex-1 overflow-hidden relative p-4">
+    <div class="flex items-center justify-center h-full text-gray-400">
+      <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i> Loading Module...
+    </div>
+  </main>
 
   <script>
-    // Redirect agad kung may active session na
-    window.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('crm_user')) {
-        goToDashboard();
+    let activeLayout = '';
+
+    // Function para palitan ang module shell (hal. pmLayout, opsLayout)
+    function switchLayout(layoutName) {
+      if (activeLayout === layoutName) return;
+      activeLayout = layoutName;
+
+      // Update Active Navigation Button Styling
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('text-gray-300');
+      });
+      const activeBtn = document.getElementById('nav-' + layoutName);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-blue-600', 'text-white');
+        activeBtn.classList.remove('text-gray-300');
       }
-    });
 
-    function submitLogin(e) {
-      e.preventDefault();
-      
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value.trim();
-      const alertMsg = document.getElementById('alertMsg');
+      // Show Loading State
+      document.getElementById('mainContent').innerHTML = `
+        <div class="flex items-center justify-center h-full text-gray-400">
+          <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i> Loading ${layoutName}...
+        </div>
+      `;
 
-      alertMsg.classList.add('d-none');
-      toggleLoading(true);
-
-      // Tawagin ang authService.gs
+      // Fetch Layout via Apps Script Server Call
       google.script.run
-        .withSuccessHandler(res => {
-          toggleLoading(false);
-          if (res && res.status === 'success') {
-            sessionStorage.setItem('crm_user', JSON.stringify(res.user));
-            goToDashboard();
-          } else {
-            alertMsg.textContent = res.message || 'Maling username o password.';
-            alertMsg.classList.remove('d-none');
-          }
+        .withSuccessHandler(html => {
+          document.getElementById('mainContent').innerHTML = html;
         })
         .withFailureHandler(err => {
-          toggleLoading(false);
-          alertMsg.textContent = 'Server Error: ' + err.message;
-          alertMsg.classList.remove('d-none');
+          document.getElementById('mainContent').innerHTML = `
+            <div class="p-6 bg-red-50 text-red-700 rounded-lg border border-red-200 m-4">
+              <h3 class="font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error Loading Module</h3>
+              <p class="text-sm mt-1">${err.message}</p>
+            </div>
+          `;
         })
-        .loginUser({ username: user, password: pass });
+        .includeModule(layoutName);
     }
 
-    function toggleLoading(isLoading) {
-      const btn = document.getElementById('btnSubmit');
-      const text = document.getElementById('btnText');
-      const spinner = document.getElementById('btnSpinner');
+    // Default Initialization on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Load Page Manager (pmLayout) as Default Initial View
+      switchLayout('pmLayout');
+    });
 
-      btn.disabled = isLoading;
-      if (isLoading) {
-        text.textContent = 'Verifying...';
-        spinner.classList.remove('d-none');
-      } else {
-        text.textContent = 'Sign In';
-        spinner.classList.add('d-none');
-      }
-    }
-
-    function goToDashboard() {
-      google.script.run
-        .withSuccessHandler(url => {
-          window.location.href = url + '?page=dashboard';
-        })
-        .getScriptUrl();
+    function logout() {
+      google.script.run.withSuccessHandler(url => {
+        window.location.href = url;
+      }).getScriptUrl();
     }
   </script>
 </body>
