@@ -1,0 +1,113 @@
+<!-- PAGE MANAGER MODULE SHELL -->
+<div class="flex flex-col h-full bg-gray-50 rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+
+  <!-- PM Sub-Navigation Bar -->
+  <header class="bg-white border-b border-gray-200 px-6 py-3 flex flex-wrap items-center justify-between gap-4 shrink-0">
+    <!-- Module Title -->
+    <div class="flex items-center gap-2">
+      <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+        <i class="fa-solid fa-bullhorn text-lg"></i>
+      </div>
+      <div>
+        <h2 class="font-bold text-gray-800 text-base leading-tight">Page Manager</h2>
+        <p class="text-xs text-gray-500">Inquiries, Content Planning & Marketing Center</p>
+      </div>
+    </div>
+
+    <!-- PM Sub-Menu Tabs -->
+    <nav class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg text-xs font-medium text-gray-600 overflow-x-auto">
+      <button onclick="loadPmView('pmDashboard')" id="pmTab-pmDashboard" 
+        class="pm-tab-btn flex items-center gap-2 px-3 py-2 rounded-md transition hover:text-gray-900 whitespace-nowrap">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Overview</span>
+      </button>
+
+      <button onclick="loadPmView('pmLeads')" id="pmTab-pmLeads" 
+        class="pm-tab-btn flex items-center gap-2 px-3 py-2 rounded-md transition hover:text-gray-900 whitespace-nowrap">
+        <i class="fa-solid fa-comments"></i>
+        <span>Leads & Inquiries</span>
+      </button>
+
+      <button onclick="loadPmView('pmCalendar')" id="pmTab-pmCalendar" 
+        class="pm-tab-btn flex items-center gap-2 px-3 py-2 rounded-md transition hover:text-gray-900 whitespace-nowrap">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Calendar Planner</span>
+      </button>
+
+      <button onclick="loadPmView('pmRemind')" id="pmTab-pmRemind" 
+        class="pm-tab-btn flex items-center gap-2 px-3 py-2 rounded-md transition hover:text-gray-900 whitespace-nowrap">
+        <i class="fa-solid fa-bell"></i>
+        <span>Follow-up Center</span>
+      </button>
+
+      <button onclick="loadPmView('pmReport')" id="pmTab-pmReport" 
+        class="pm-tab-btn flex items-center gap-2 px-3 py-2 rounded-md transition hover:text-gray-900 whitespace-nowrap">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Analytics</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- PM Dynamic Content Display Area -->
+  <div id="pmViewContainer" class="flex-1 overflow-y-auto p-6 relative">
+    <div class="flex items-center justify-center h-full text-gray-400">
+      <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i> Loading Page Manager View...
+    </div>
+  </div>
+
+</div>
+
+<!-- PM Shell Controller Script -->
+<script>
+  let activePmView = '';
+
+  /**
+   * Nag-i-inject ng dynamic sub-views sa loob ng Page Manager Shell.
+   * @param {string} viewName - Pangalan ng sub-view HTML file (hal. 'pmDashboard', 'pmLeads')
+   */
+  function loadPmView(viewName) {
+    if (activePmView === viewName) return;
+    activePmView = viewName;
+
+    // Active Tab Styling Handler
+    document.querySelectorAll('.pm-tab-btn').forEach(btn => {
+      btn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'font-semibold');
+      btn.classList.add('text-gray-600');
+    });
+
+    const activeBtn = document.getElementById('pmTab-' + viewName);
+    if (activeBtn) {
+      activeBtn.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'font-semibold');
+      activeBtn.classList.remove('text-gray-600');
+    }
+
+    // Loading State
+    const container = document.getElementById('pmViewContainer');
+    container.innerHTML = `
+      <div class="flex items-center justify-center h-full text-gray-400">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl mr-3 text-blue-500"></i>
+        <span class="text-sm font-medium">Loading ${viewName}...</span>
+      </div>
+    `;
+
+    // Apps Script Server Call via includeModule
+    google.script.run
+      .withSuccessHandler(html => {
+        container.innerHTML = html;
+      })
+      .withFailureHandler(err => {
+        container.innerHTML = `
+          <div class="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">
+            <p class="font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error loading ${viewName}.html</p>
+            <p class="text-xs mt-1">${err.message}</p>
+          </div>
+        `;
+      })
+      .includeModule(viewName);
+  }
+
+  // Automatic Load of Default Sub-View (pmDashboard) upon Shell Load
+  (function initPmShell() {
+    loadPmView('pmDashboard');
+  })();
+</script>
